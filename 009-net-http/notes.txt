@@ -1,0 +1,4 @@
+handler is the most used interface
+type Handler interface {
+  ServeHttp(ResponseWriter, *Request)
+}

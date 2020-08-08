@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<body>
+
+<h2>Identiy form</h2>
+
+{{if .msg eq "Success"}}
+<p style="color:green;">{{.msg}}</p>
+{{else}}
+<p style="color:red;">{{.msg}}</p>
+{{end}}
+
+<form action="/" method="POST">
+  <label for="uname">Username:</label><br>
+  <input type="text" id="uname" name="uname"><br>
+  <label for="password">Password:</label><br>
+  <input type="password" id="password" name="password"><br><br>
+  <input type="submit" value="Submit">
+</form>
+
+<p></p>
+
+</body>
+</html>

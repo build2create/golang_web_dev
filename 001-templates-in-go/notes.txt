@@ -1,0 +1,66 @@
+// FuncMap is the type of the map defining the mapping from names to functions.
+// Each function must have either a single return value, or two return values of
+// which the second has type error. In that case, if the second (error)
+// return value evaluates to non-nil during execution, execution terminates and
+// Execute returns that error.
+//
+// When template execution invokes a function with an argument list, that list
+// must be assignable to the function's parameter types. Functions meant to
+// apply to arguments of arbitrary type can use parameters of type interface{} or
+// of type reflect.Value. Similarly, functions meant to return a result of arbitrary
+// type can return interface{} or reflect.Value.
+type FuncMap map[string]interface{}
+
+var builtins = FuncMap{
+	"and":      and,
+	"call":     call,
+	"html":     HTMLEscaper,
+	"index":    index,
+	"slice":    slice,
+	"js":       JSEscaper,
+	"len":      length,
+	"not":      not,
+	"or":       or,
+	"print":    fmt.Sprint,
+	"printf":   fmt.Sprintf,
+	"println":  fmt.Sprintln,
+	"urlquery": URLQueryEscaper,
+
+	// Comparisons
+	"eq": eq, // ==
+	"ge": ge, // >=
+	"gt": gt, // >
+	"le": le, // <=
+	"lt": lt, // <
+	"ne": ne, // !=
+}
+
+var builtinFuncs = createValueFuncs(builtins)
+
+// createValueFuncs turns a FuncMap into a map[string]reflect.Value
+func createValueFuncs(funcMap FuncMap) map[string]reflect.Value {
+	m := make(map[string]reflect.Value)
+	addValueFuncs(m, funcMap)
+	return m
+}
+
+// addValueFuncs adds to values the functions in funcs, converting them to reflect.Values.
+func addValueFuncs(out map[string]reflect.Value, in FuncMap) {
+	for name, fn := range in {
+		if !goodName(name) {
+			panic(fmt.Errorf("function name %q is not a valid identifier", name))
+		}
+		v := reflect.ValueOf(fn)
+		if v.Kind() != reflect.Func {
+			panic("value for " + name + " not a function")
+		}
+		if !goodFunc(v.Type()) {
+			panic(fmt.Errorf("can't install method/function %q with %d results", name, v.Type().NumOut()))
+		}
+		out[name] = v
+	}
+}
+type Template struct {
+    *parse.Tree
+    // contains filtered or unexported fields
+}

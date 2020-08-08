@@ -1,0 +1,16 @@
+a) At the basic level, reflection is just a mechanism to examine the type and value pair stored inside an interface variable.
+  To get started, there are two types we need to know about in package reflect: Type and Value.
+
+b) You can use reflection to get the type of a variable var with the function call varType := reflect.TypeOf(var).
+ This returns a variable of type reflect.Type, which has methods with all sorts of information about the type that defines the variable
+ that was passed in
+
+c)The kind is what the type is made of — a slice, a map, a pointer, a struct, an interface, a string, an array, a function,
+an int or some other primitive type. The difference between the kind and the type can be tricky to understand, but think of it this way.
+ If you define a struct named Foo, the kind is struct and the type is Foo.
+
+ d) One thing to be aware of when using reflection: everything in the reflect package assumes that you know what you are doing and many of the function
+ and method calls will panic if used incorrectly. For example, if you call a method on reflect.Type that’s associated with a different kind of type than the current one, your code will panic
+
+e)The signature of reflect.TypeOf includes an empty interface:When we call reflect.TypeOf(x), x is first stored in an empty interface, which is then passed as the argument; reflect.
+TypeOf unpacks that empty interface to recover the type information

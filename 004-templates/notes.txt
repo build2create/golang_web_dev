@@ -1,0 +1,42 @@
+template.Template => text template https://pkg.go.dev/text/template?tab=doc#Template
+func Execute => https://pkg.go.dev/text/template?tab=doc#Template.Execute
+  sign: func (t *Template) Execute(wr io.Writer, data interface{}) error
+  description: Execute applies a parsed template to the specified data object, and writes the output to wr.
+               If an error occurs executing the template or writing its output, execution stops, but partial results may already
+               have been written to the output writer
+func Must => https://pkg.go.dev/text/template?tab=doc#Must
+  sign: func Must(t *Template, err error) *Template
+  description: Wrapping function to Template New and it is indented to be used for variable initializations
+  eg: var t = template.Must(template.New("name").Parse("text"))
+func New => https://pkg.go.dev/text/template?tab=doc#New
+  sign: func New(name string) *Template
+  description: New allocates a new, undefined template with the given name.
+func Parse => https://pkg.go.dev/text/template?tab=doc#Template.Parse
+  sign: func (t *Template) Parse(text string) (*Template, error)
+  description: Parse parses text as a template body for t. Named template definitions ({{define ...}} or {{block ...}} statements)
+               in text define additional templates associated with t and are removed from the definition of t itself
+
+
+So far so good, but there's still a missing key point. This is not unambiguous / trivial: a template.Template value is "the representation of a parsed template".
+But the wording here is a little "imperfect". A template.Template value may be (and usually is) a collection of multiple,
+associated templates. template.Template has an unexported field
+
+tmpl   map[string]*Template // Map from name to defined templates.
+
+This tmpl field holds all other associated templates, templates that are visible to the template, and which can be referred to–yes–by their names.
+
+When you parse multiple templates at once, using Template.ParseFiles() or Template.ParseGlob(),
+then the templates will be named by the file names, and they will be associated automatically (the above mentioned functions return a single template.Template value, which holds all the parsed templates, associated).
+Doc of Template.ParseFiles() is clear on this:
+*************************************************************************************************************************************************
+  ParseFiles creates a new Template and parses the template definitions from the named files.
+  The returned template's name will have the base name and parsed contents of the first file.
+
+  When parsing multiple files with the same name in different directories, the last one mentioned will be the one that results.
+  For instance, ParseFiles("a/foo", "b/foo") stores "b/foo" as the template named "foo", while "a/foo" is unavailable.
+***************************************************************************************************************************************************
+The template name can come from multiple places:
+
+it can come from the file name (as seen above)
+it can be specified explicitly (if defined using the {{define "somename"}} or {{block "somename"}} actions),
+or it may be defined as an argument passed to template.New() (function) or Template.New() (method).
