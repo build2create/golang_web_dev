@@ -1,4 +1,4 @@
-package restaurant
+package models
 
 type Restaurant struct {
 	Branch       string
